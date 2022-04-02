@@ -99,14 +99,31 @@ g = dgl.graph((u, v))
 # print(g)
 g.ndata['x'] = th.randn(5, 3)   # 原始特征在CPU上
 # print(g.ndata['x'])
-# print("当前运行设备：", g.device)     # CPU
+print("g的运行设备：", g.device)     # CPU
 
-print("cuda是否可用：", th.cuda.is_available())       # 查看cuda是否可用
-print("cuda数量：", th.cuda.device_count())       # 查看cuda数量
-print("GPU名称：", th.cuda.get_device_name())    # 查看gpu名字
-print("当前设备索引号：", th.cuda.current_device())     # 当前设备索引
-print("cuda版本：", th.version.cuda)
+# print("cuda是否可用：", th.cuda.is_available())       # 查看cuda是否可用
+# print("cuda数量：", th.cuda.device_count())          # 查看cuda数量
+# print("GPU名称：", th.cuda.get_device_name())        # 查看gpu名字
+# print("当前设备索引号：", th.cuda.current_device())    # 当前设备索引
+# print("cuda版本：", th.version.cuda)
 
 cuda_g = g.to('cuda:0')         # 接受来自后端框架的任何设备对象
 print(cuda_g.device)
-print("pytroch版本：", th.__version__)
+# print("pytroch版本：", th.__version__)
+
+# 由GPU张量构造的图也在GPU上
+u, v = u.to('cuda:0'), v.to('cuda:0')
+g = dgl.graph((u, v))
+print(g.device)
+
+''' 
+    任何涉及GPU图的操作都是在GPU上运行的。
+    因此，这要求所有张量参数都已经放在GPU上，其结果(图或张量)也将在GPU上。
+    此外，GPU图只接受GPU上的特征数据。
+'''
+print(cuda_g.in_degrees())              # g的入度
+print(cuda_g.in_edges([2, 3, 4]))       # 可以接受非张量类型的参数, dgl.DGLGraph.in_edges()返回给定节点的传入边。
+print(cuda_g.in_edges(th.tensor([2, 3, 4]).to('cuda:0')))  # 张量类型的参数必须在GPU上
+cuda_g.ndata['h'] = th.randn(5, 4).to('cuda:0')            # 特征也必须在GPU上！
+print(cuda_g.ndata['h'])
+
