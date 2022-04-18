@@ -59,7 +59,7 @@ print(g.ndata["pagerank"])
 """
 
 
-def paggrank_build(g):
+def pagerank_build(g):
     g.ndata["pagerank"] = g.ndata["pagerank"] / g.ndata["degree"]
     g.update_all(message_func=fn.copy_src(src="pagerank", out="m"),
                  reduce_func=fn.sum(msg="m", out = "m_sum"))
@@ -67,6 +67,6 @@ def paggrank_build(g):
 
 
 for i in range(5):
-    paggrank_build(g)
+    pagerank_build(g)
     print(g.ndata["pagerank"])
 
